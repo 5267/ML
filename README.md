@@ -1,7 +1,7 @@
 ## The universe of machine learning 
 Where there is data generated, there is machine learning algorithms in use. 
 
-## Type of algorithms：in theory
+### Type of algorithms：in theory
 There are thousands of machine learning algorithms available that it can feel overwhelming when algorithm names are thrown around. It is useful to tour the main algorithms in the field to get a feeling of what methods are available. This section plans to summarize the most of algorithms in theory and classify them according to their attributes. 
 
 ### Industry-algorithms: in practice
