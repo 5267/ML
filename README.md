@@ -1,7 +1,11 @@
 ## The universe of machine learning 
-where there is data generated, there is machine learning algorithms in use. 
+Where there is data generated, there is machine learning algorithms in use. 
+
+## Type of algorithms
+There are thousands of machine learning algorithms available that it can feel overwhelming when algorithm names are thrown around. It is useful to tour the main algorithms in the field to get a feeling of what methods are available. This section plans to summarize the most of algorithms and classify them according to their attributes. 
+
 ### Industry-algorithms
-the section is aimed at explaining the machine learning algorithms that are in use now or will be applied in future in all kinds of sectors of society. Give help to those who are interested in exploring the forest of algorithms by case-based teaching and learning. 
+This section is aimed at explaining the machine learning algorithms that are in use now or will be applied in future in all kinds of sectors of society. Give help to those who are interested in exploring the forest of algorithms by case-based teaching and learning. 
 
 1. 计算机/互联网/通信/电子
 - 1.1 计算机软件
@@ -86,5 +90,5 @@ the section is aimed at explaining the machine learning algorithms that are in u
 - 1.5 多元化业务集团公司
 
 ## Scenario-algorithms
-
+this section tries to provide a broad view of algorithms that are practically applied in various specific scenario, and focuses on algorithmic solutions to questions from a particular perspective of scenario. Here, you might find similar answers to challenges that are annoying you right now, and probably you can get inspired by reading our open-source materials.
 
