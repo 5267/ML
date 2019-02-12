@@ -1,3 +1,5 @@
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML"> </script>
+
 ## Machine Learning Algorithms
 Broadly, there are 3 types of Machine Learning Algorithms.
 
