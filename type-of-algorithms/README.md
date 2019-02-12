@@ -35,9 +35,7 @@ Here is the list of commonly used machine learning algorithms. These algorithms 
 
 #### 1. Linear Regression
 It is used to estimate real values (cost of houses, number of calls, total sales etc.) based on continuous variable(s). Here, we establish relationship between independent and dependent variables by fitting a best line. This best fit line is known as regression line and represented by a linear equation 
-
-$$Y= a *X + b$$
-
+<center>Y= a * X + b</center>
 The best way to understand linear regression is to relive this experience of childhood. Let us say, you ask a child in fifth grade to arrange people in his class by increasing order of weight, without asking them their weights! What do you think the child will do? He / she would likely look (visually analyze) at the height and build of people and arrange them using a combination of these visible parameters. This is linear regression in real life! The child has actually figured out that height and build would be correlated to the weight by a relationship, which looks like the equation above.
 
 In this equation:
