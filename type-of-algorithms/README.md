@@ -245,6 +245,7 @@ This is where decision tree helps, it will segregate the students based on all v
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Decision%20Tree.png?raw=true)
 
 #####3.1 Types of Decision Trees
+
 Types of decision tree is based on the type of target variable we have. It can be of two types:
 
 1. Categorical Variable Decision Tree: Decision Tree which has categorical target variable then it called as categorical variable decision tree. **Example**:- In above scenario of student problem, where the target variable was “Student will play cricket or not” i.e. YES or NO.
