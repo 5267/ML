@@ -259,6 +259,7 @@ Decision trees use multiple algorithms to decide to split a node in two or more 
 The algorithm selection is also based on type of target variables. Let’s look at the four most commonly used algorithms in decision tree:
 
 **3.2.1 Gini Index**
+
 Gini index says, if we select two items from a population at random then they must be of same class and probability for this is 1 if population is pure.
 
 1. It works with categorical target variable “Success” or “Failure”.
@@ -287,6 +288,7 @@ Gini index says, if we select two items from a population at random then they mu
 Above, you can see that Gini score for Split on Gender is higher than Split on Class, hence, the node split will take place on Gender.
 
 **3.2.2 Chi-Square**
+
 It is an algorithm to find out the statistical significance between the differences between sub-nodes and parent node. We measure it by sum of squares of standardized differences between observed and expected frequencies of target variable.
 1. It works with categorical target variable “Success” or “Failure”.
 2. It can perform two or more splits.
@@ -316,6 +318,7 @@ Perform similar steps of calculation for split on Class and you will come up wit
 Above, you can see that Chi-square also identify the Gender split is more significant compare to Class.
 
 **3.2.3 Information Gain**
+
 Look at the image below and think which node can be described easily. I am sure, your answer is C because it requires less information as all values are similar. On the other hand, B requires more information to describe it and A requires the maximum information. In other words, we can say that C is a Pure node, B is less Impure and A is more impure.
 
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Information_Gain_Decision_Tree2.png?raw=true)
@@ -340,7 +343,8 @@ Here *p* and *q* is probability of success and failure respectively in that node
 
 Above, you can see that entropy for Split on Gender is the lowest among all, so the tree will split on Gender. We can derive information gain from entropy as **1- Entropy**.
 
-**3.2.4 Information Gain**
+**3.2.4 Reduction in Variance**
+
 Till now, we have discussed the algorithms for categorical target variable. Reduction in variance is an algorithm used for continuous target variables (regression problems). This algorithm uses the standard formula of variance to choose the best split. The split with lower variance is selected as the criteria to split the population:
 $$Variance = \frac{\sum(X-\overline{X})^2}{n}$$
 Above X-bar is mean of the values, X is actual and n is number of values.
@@ -362,3 +366,12 @@ Calculate variance for each split as weighted average of each node variance.
 
 Above, you can see that Gender split has lower variance compare to parent node, so the split would take place on Gender variable.
 
+#### 3.1 Overfitting challenges
+Overfitting is one of the key challenges faced while modeling decision trees. If there is no limit set of a decision tree, it will give you 100% accuracy on training set because in the worse case it will end up making 1 leaf for each observation. Thus, preventing overfitting is pivotal while modeling a decision tree and it can be done in 2 ways:
+
+1. Setting constraints on tree size
+2. Tree pruning
+
+**3.1.1 Setting constraints on tree size**
+
+This can be done by using various parameters which are used to define a tree. First, lets look at the general structure of a decision tree:
