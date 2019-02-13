@@ -244,21 +244,21 @@ This is where decision tree helps, it will segregate the students based on all v
 
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Decision%20Tree.png?raw=true)
 
-#####3.1 Types of Decision Trees
+####3.1 Types of Decision Trees
 
 Types of decision tree is based on the type of target variable we have. It can be of two types:
 
 1. Categorical Variable Decision Tree: Decision Tree which has categorical target variable then it called as categorical variable decision tree. **Example**:- In above scenario of student problem, where the target variable was “Student will play cricket or not” i.e. YES or NO.
 2. Continuous Variable Decision Tree: Decision Tree has continuous target variable then it is called as Continuous Variable Decision Tree. **Example**:- Let’s say we have a problem to predict whether a customer will pay his renewal premium with an insurance company (yes/ no). Here we know that income of customer is a significant variable but insurance company does not have income details for all customers. Now, as we know this is an important variable, then we can build a decision tree to predict customer income based on occupation, product and various other variables. In this case, we are predicting values for continuous variable.
 
-##### 3.2 How does a tree decide where to split?
+#### 3.2 How does a tree decide where to split?
 The decision of making strategic splits heavily affects a tree’s accuracy. The decision criteria is different for classification and regression trees.
 
 Decision trees use multiple algorithms to decide to split a node in two or more sub-nodes. The creation of sub-nodes increases the homogeneity of resultant sub-nodes. In other words, we can say that purity of the node increases with respect to the target variable. Decision tree splits the nodes on all available variables and then selects the split which results in most homogeneous sub-nodes.
 
 The algorithm selection is also based on type of target variables. Let’s look at the four most commonly used algorithms in decision tree:
 
-##### 3.2.1 Gini Index
+**3.2.1 Gini Index**
 Gini index says, if we select two items from a population at random then they must be of same class and probability for this is 1 if population is pure.
 
 1. It works with categorical target variable “Success” or “Failure”.
@@ -266,7 +266,7 @@ Gini index says, if we select two items from a population at random then they mu
 3. Higher the value of Gini higher the homogeneity.
 4. CART (Classification and Regression Tree) uses Gini method to create binary splits.
 
-##### Steps to Calculate Gini for a split
+**Steps to Calculate Gini for a split**
 1. Calculate Gini for sub-nodes, using formula sum of square of probability for success and failure $p^2+q^2$.
 2. Calculate Gini for split using weighted Gini score of each node of that split
 
@@ -286,7 +286,7 @@ Gini index says, if we select two items from a population at random then they mu
 
 Above, you can see that Gini score for Split on Gender is higher than Split on Class, hence, the node split will take place on Gender.
 
-##### 3.2.2 Chi-Square
+**3.2.2 Chi-Square**
 It is an algorithm to find out the statistical significance between the differences between sub-nodes and parent node. We measure it by sum of squares of standardized differences between observed and expected frequencies of target variable.
 1. It works with categorical target variable “Success” or “Failure”.
 2. It can perform two or more splits.
@@ -315,7 +315,7 @@ Perform similar steps of calculation for split on Class and you will come up wit
 
 Above, you can see that Chi-square also identify the Gender split is more significant compare to Class.
 
-##### 3.2.3 Information Gain
+**3.2.3 Information Gain**
 Look at the image below and think which node can be described easily. I am sure, your answer is C because it requires less information as all values are similar. On the other hand, B requires more information to describe it and A requires the maximum information. In other words, we can say that C is a Pure node, B is less Impure and A is more impure.
 
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Information_Gain_Decision_Tree2.png?raw=true)
@@ -340,7 +340,7 @@ Here *p* and *q* is probability of success and failure respectively in that node
 
 Above, you can see that entropy for Split on Gender is the lowest among all, so the tree will split on Gender. We can derive information gain from entropy as **1- Entropy**.
 
-##### 3.2.4 Information Gain
+**3.2.4 Information Gain**
 Till now, we have discussed the algorithms for categorical target variable. Reduction in variance is an algorithm used for continuous target variables (regression problems). This algorithm uses the standard formula of variance to choose the best split. The split with lower variance is selected as the criteria to split the population:
 $$Variance = \frac{\sum(X-\overline{X})^2}{n}$$
 Above X-bar is mean of the values, X is actual and n is number of values.
