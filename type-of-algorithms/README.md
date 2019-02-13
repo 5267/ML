@@ -317,4 +317,47 @@ Above, you can see that Chi-square also identify the Gender split is more signif
 ##### 3.2.3 Information Gain
 Look at the image below and think which node can be described easily. I am sure, your answer is C because it requires less information as all values are similar. On the other hand, B requires more information to describe it and A requires the maximum information. In other words, we can say that C is a Pure node, B is less Impure and A is more impure.
 
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Information_Gain_Decision_Tree2.png?raw=true)
+
+Now, we can build a conclusion that less impure node requires less information to describe it. And, more impure node requires more information. **Information theory** is a measure to define this degree of disorganization in a system known as **Entropy**. If the sample is completely homogeneous, then the entropy is zero and if the sample is an equally divided (50% – 50%), it has entropy of one.
+
+Entropy can be calculated using formula:
+$$Entropy = -p log_2p - q log_2q $$
+Here *p* and *q* is probability of success and failure respectively in that node. Entropy is also used with categorical target variable. It chooses the split which has lowest entropy compared to parent node and other splits. The lesser the entropy, the better it is
+
+**Steps to calculate entropy for a split**
+1. Calculate entropy of parent node
+2. Calculate entropy of each individual node of split and calculate weighted average of all sub-nodes available in split.
+
+**Example**: Let’s use this method to identify best split for student example
+
+1. Entropy for parent node = -(15/30) log2 (15/30) – (15/30) log2 (15/30) = 1. Here 1 shows that it is a impure node.
+2. Entropy for Female node = -(2/10) log2 (2/10) – (8/10) log2 (8/10) = 0.72 and for male node,  -(13/20) log2 (13/20) – (7/20) log2 (7/20) = 0.93
+3. Entropy for split Gender = Weighted entropy of sub-nodes = (10/30)*0.72 + (20/30)*0.93 = 0.86
+4. Entropy for Class IX node, -(6/14) log2 (6/14) – (8/14) log2 (8/14) = 0.99 and for Class X node,  -(9/16) log2 (9/16) – (7/16) log2 (7/16) = 0.99.
+5. Entropy for split Class =  (14/30)*0.99 + (16/30)*0.99 = 0.99
+
+Above, you can see that entropy for Split on Gender is the lowest among all, so the tree will split on Gender. We can derive information gain from entropy as **1- Entropy**.
+
+##### 3.2.4 Information Gain
+Till now, we have discussed the algorithms for categorical target variable. Reduction in variance is an algorithm used for continuous target variables (regression problems). This algorithm uses the standard formula of variance to choose the best split. The split with lower variance is selected as the criteria to split the population:
+$$Variance = \frac{\sum(X-\overline{X})^2}{n}$$
+Above X-bar is mean of the values, X is actual and n is number of values.
+
+**Steps to calculate Variance**:
+
+Calculate variance for each node.
+Calculate variance for each split as weighted average of each node variance.
+
+**Example**:- Let’s assign numerical value 1 for play cricket and 0 for not playing cricket. Now follow the steps to identify the right split:
+
+1. Variance for Root node, here mean value is (15*1 + 15*0)/30 = 0.5 and we have 15 one and 15 zero. Now variance would be ((1-0.5)^2+(1-0.5)^2+….15 times+(0-0.5)^2+(0-0.5)^2+…15 times) / 30, this can be written as (15*(1-0.5)^2+15*(0-0.5)^2) / 30 = 0.25
+2. Mean of Female node =  (2*1+8*0)/10=0.2 and Variance = (2*(1-0.2)^2+8*(0-0.2)^2) / 10 = 0.16
+3. Mean of Male Node = (13*1+7*0)/20=0.65 and Variance = (13*(1-0.65)^2+7*(0-0.65)^2) / 20 = 0.23
+4. Variance for Split Gender = Weighted Variance of Sub-nodes = (10/30)*0.16 + (20/30) *0.23 = 0.21
+5. Mean of Class IX node =  (6*1+8*0)/14=0.43 and Variance = (6*(1-0.43)^2+8*(0-0.43)^2) / 14= 0.24
+6. Mean of Class X node =  (9*1+7*0)/16=0.56 and Variance = (9*(1-0.56)^2+7*(0-0.56)^2) / 16 = 0.25
+7. Variance for Split Gender = (14/30)*0.24 + (16/30) *0.25 = 0.25
+
+Above, you can see that Gender split has lower variance compare to parent node, so the split would take place on Gender variable.
 
