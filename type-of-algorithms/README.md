@@ -366,12 +366,119 @@ Calculate variance for each split as weighted average of each node variance.
 
 Above, you can see that Gender split has lower variance compare to parent node, so the split would take place on Gender variable.
 
-#### 3.1 Overfitting challenges
+#### 3.3 Overfitting challenges
 Overfitting is one of the key challenges faced while modeling decision trees. If there is no limit set of a decision tree, it will give you 100% accuracy on training set because in the worse case it will end up making 1 leaf for each observation. Thus, preventing overfitting is pivotal while modeling a decision tree and it can be done in 2 ways:
 
 1. Setting constraints on tree size
 2. Tree pruning
 
-**3.1.1 Setting constraints on tree size**
+**3.3.1 Setting constraints on tree size**
 
 This can be done by using various parameters which are used to define a tree. First, lets look at the general structure of a decision tree:
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/tree-infographic.png?raw=true)
+
+The parameters used for defining a tree are further explained below
+
+1. Minimum samples for a node split
+    - Defines the minimum number of samples (or observations) which are required in a node to be considered for splitting.
+    - Used to control over-fitting. Higher values prevent a model from learning relations which might be highly specific to the particular sample selected for a tree.
+    - Too high values can lead to under-fitting hence, it should be tuned using **CV**.
+2. Minimum samples for a terminal node (leaf)
+    - Defines the minimum samples (or observations) required in a terminal node or leaf.
+    - Used to control over-fitting similar to min_samples_split.
+    - Generally lower values should be chosen for imbalanced class problems because the regions in which the minority class will be in majority will be very small.
+3. Maximum depth of tree (vertical depth)
+    - The maximum depth of a tree.
+    - Used to control over-fitting as higher depth will allow model to learn relations very specific to a particular sample.
+    - Should be tuned using **CV**.
+4. Maximum number of terminal nodes
+    - The maximum number of terminal nodes or leaves in a tree.
+    - Can be defined in place of max_depth. Since binary trees are created, a depth of ‘n’ would produce a maximum of 2^n leaves.
+5. Maximum features to consider for split
+    - The number of features to consider while searching for a best split. These will be randomly selected.
+    - As a thumb-rule, square root of the total number of features works great but we should check upto 30-40% of the total number of features.
+    - Higher values can lead to over-fitting but depends on case to case.
+ 
+ **3.2.2 Tree Pruning**
+
+As discussed earlier, the technique of setting constraint is a greedy-approach. In other words, it will check for the best split instantaneously and move forward until one of the specified stopping condition is reached. Let’s consider the following case when you’re driving:
+
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/tree-pruning.png?raw=true)
+
+There are 2 lanes:
+
+1. A lane with cars moving at 80km/h
+2. A lane with trucks moving at 30km/h
+
+At this instant, you are the yellow car and you have 2 choices:
+
+1. Take a left and overtake the other 2 cars quickly
+2. Keep moving in the present lane
+
+Lets analyze these choice. In the former choice, you’ll immediately overtake the car ahead and reach behind the truck and start moving at 30 km/h, looking for an opportunity to move back right. All cars originally behind you move ahead in the meanwhile. This would be the optimum choice if your objective is to maximize the distance covered in next say 10 seconds. In the later choice, you sale through at same speed, cross trucks and then overtake maybe depending on situation ahead. Greedy you!
+
+This is exactly the difference between **normal decision tree & pruning**. A decision tree with constraints won’t see the truck ahead and adopt a greedy approach by taking a left. On the other hand if we use pruning, we in effect look at a few steps ahead and make a choice.
+
+So we know pruning is better. But how to implement it in decision tree? The idea is simple.
+
+1. We first make the decision tree to a large depth.
+2. Then we start at the bottom and start removing leaves which are giving us negative returns when compared from the top.
+3. Suppose a split is giving us a gain of say -10 (loss of 10) and then the next split on that gives us a gain of 20. A simple decision tree will stop at step 1 but in pruning, we will see that the overall gain is +10 and keep both leaves.
+
+#### 4、Working with Decision Trees in Python
+
+```
+# Import the necessary modules and libraries
+import numpy as np
+from sklearn.tree import DecisionTreeRegressor
+import matplotlib.pyplot as plt
+
+# Create a random dataset
+rng = np.random.RandomState(1)
+X = np.sort(5 * rng.rand(80, 1), axis=0)
+y = np.sin(X).ravel()
+y[::5] += 3 * (0.5 - rng.rand(16))
+
+# Fit regression model
+regr_1 = DecisionTreeRegressor(max_depth=2)
+regr_2 = DecisionTreeRegressor(max_depth=5)
+regr_1.fit(X, y)
+regr_2.fit(X, y)
+
+# Predict
+X_test = np.arange(0.0, 5.0, 0.01)[:, np.newaxis]
+y_1 = regr_1.predict(X_test)
+y_2 = regr_2.predict(X_test)
+
+# Plot the results
+plt.figure()
+plt.scatter(X, y, s=20, edgecolor="black",
+            c="darkorange", label="data")
+plt.plot(X_test, y_1, color="cornflowerblue",
+         label="max_depth=2", linewidth=2)
+plt.plot(X_test, y_2, color="yellowgreen", label="max_depth=5", linewidth=2)
+plt.xlabel("data")
+plt.ylabel("target")
+plt.title("Decision Tree Regression")
+plt.legend()
+plt.show()
+```
+
+#### 5、What are ensemble methods in tree based modeling ?
+
+The literary meaning of word ‘ensemble’ is **group**. Ensemble methods involve group of predictive models to achieve a better accuracy and model stability. Ensemble methods are known to impart supreme boost to tree based models.
+
+Like every other model, a tree based model also suffers from the plague of bias and variance. **Bias** means, ‘how much on an average are the predicted values different from the actual value.’ **Variance** means, ‘how different will the predictions of the model be at the same point if different samples are taken from the same population’.
+$$Error = Bias^2 + Variance + Noise$$
+<font color='red'>注：Bias，刻画算法的拟合能力，偏高,表示预测函数与真实结果差异很大；Variance代表“同样大小的不同训练数据集训练出的模型”与这些模型的预期输出值“之间的差异，偏高，表示模型很不稳定；Noise是模型无法避免的噪音。</font>
+You build a small tree and you will get a model with low variance and high bias. How do you manage to balance the trade off between bias and variance ?
+
+Normally, as you increase the complexity of your model, you will see a reduction in prediction error due to lower bias in the model. As you continue to make your model more complex, you end up over-fitting your model and your model will start suffering from high variance.
+
+A champion model should maintain a balance between these two types of errors. This is known as the **trade-off management** of bias-variance errors. Ensemble learning is one way to execute this trade off analysis.
+
+
+
+
