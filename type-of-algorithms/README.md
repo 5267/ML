@@ -19,11 +19,15 @@ Here is the list of commonly used machine learning algorithms. These algorithms 
 1. Linear Regression
 2. Logistic Regression
 3. Decision Tree
+    - ensemble method
+        - Bagging: Random Forest & CART
+        - Boosting
+        - Stacking
 4. SVM
 5. Naive Bayes
 6. kNN
 7. K-Means
-8. Random Forest
+8. Random Forest(bagging)
 9. Dimensionality Reduction Algorithms
 10. Gradient Boosting algorithms
     1. GBM
@@ -479,6 +483,147 @@ Normally, as you increase the complexity of your model, you will see a reduction
 
 A champion model should maintain a balance between these two types of errors. This is known as the **trade-off management** of bias-variance errors. Ensemble learning is one way to execute this trade off analysis.
 
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/model_complexity.png?raw=true)
 
+Some of the commonly used ensemble methods include: **Bagging, Boosting and Stacking**
 
+#### 5.1 bagging, How does it work?
+Bagging is a technique used to reduce the variance of our predictions by combining the result of multiple classifiers modeled on different sub-samples of the same data set. The following figure will make it clearer:
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/bagging.png?raw=true)
 
+The steps followed in bagging are:
+
+1. Create Multiple DataSets:
+    - Sampling is done with replacement on the original data and new datasets are formed.
+    - The new data sets can have a fraction of the columns as well as rows, which are generally hyper-parameters in a bagging model
+    - Taking row and column fractions less than 1 helps in making robust models, less prone to overfitting
+2. Build Multiple Classifiers:
+    - Classifiers are built on each data set.
+    - Generally the same classifier is modeled on each data set and predictions are made.
+3. Combine Classifiers:
+    - The predictions of all the classifiers are combined using a **mean, median or mode** value depending on the problem at hand.
+    - The combined values are generally more robust than a single model.
+
+Note that, here the number of models built is not a hyper-parameters. Higher number of models are always better or may give similar performance than lower numbers. It can be theoretically shown that the variance of the combined predictions are reduced to 1/n (n: number of classifiers) of the original variance, under some assumptions.
+
+There are various implementations of bagging models. Random forest is one of them.
+
+#### 5.1.1 Random Forest
+Random Forest is considered to be a panacea of all data science problems. On a funny note, when you can’t think of any algorithm (irrespective of situation), use random forest!
+
+Random Forest is a versatile machine learning method capable of performing both regression and classification tasks. It also undertakes dimensional reduction methods, treats missing values, outlier values and other essential **[steps of data exploration](https://www.analyticsvidhya.com/blog/2015/02/data-exploration-preparation-model/)**, and does a fairly good job. It is a type of ensemble learning method, where a group of weak models combine to form a powerful model.
+
+**How does it work?**
+In Random Forest, we grow multiple trees as opposed to a single tree in CART model (see comparison between CART and Random Forest here, [part1](https://www.analyticsvidhya.com/blog/2014/06/comparing-cart-random-forest-1/) and [part2](https://www.analyticsvidhya.com/blog/2014/06/comparing-random-forest-simple-cart-model/))
+
+To classify a new object based on attributes, each tree gives a classification and we say the tree “votes” for that class. The forest chooses the classification having the most votes (over all the trees in the forest) and in case of regression, it takes the average of outputs by different trees.
+
+It works in the following manner. Each tree is planted & grown as follows:
+
+1. Assume number of cases in the training set is N. Then, sample of these N cases is taken at random but with replacement. This sample will be the training set for growing the tree.
+2. If there are M input variables, a number m<M is specified such that at each node, m variables are selected at random out of the M. The best split on these m is used to split the node. The value of m is held constant while we grow the forest.
+3. Each tree is grown to the largest extent possible and  there is no pruning.
+4. Predict new data by aggregating the predictions of the ntree trees (i.e., majority votes for classification, average for regression).
+
+**Case Study**
+
+Following is a distribution of Annual income Gini Coefficients across different countries :
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/oecd-income_inequality_2013_2.png?raw=true)
+
+Mexico has the second highest Gini coefficient and hence has a very high segregation in annual income of rich and poor. Our task is to come up with an accurate predictive algorithm to estimate annual income bracket of each individual in Mexico. The brackets of income are as follows :
+
+1. Below $40,000
+2. $40,000 – 150,000
+3. More than $150,000
+
+Following are the information available for each individual :
+
+1. Age , 
+2. Gender,  
+3. Highest educational qualification, 
+4. Working in Industry, 
+5. Residence in Metro/Non-metro
+
+We need to come up with an algorithm to give an accurate prediction for an individual who has following traits:
+
+1. Age : 35 years , 
+2, Gender : Male , 
+3. Highest Educational Qualification : Diploma holder, 
+4. Industry : Manufacturing, 
+5. Residence : Metro
+
+**The algorithm  of Random Forest**
+
+**Random forest** is like bootstrapping algorithm with Decision tree (CART) model. Say, we have **1000 observation** in the complete population with **10 variables**. Random forest tries to build multiple CART model with different sample and different initial variables. For instance, it will take a random sample of 100 observation and 5 randomly chosen initial variables to build a CART model. It will repeat the process (say) 10 times and then make a final prediction on each observation. Final prediction is a function of each prediction. This final prediction can simply be the mean of each prediction.
+
+**Back to Case  study**
+
+Mexico has a population of 118 MM. Say, the algorithm Random forest picks up 10k observation with only one variable (for simplicity) to build each CART model. In total, we are looking at 5 CART model being built with different variables. In a real life problem, you will have more number of population sample and different combinations of  input variables.
+
+**Salary bands** :
+
+1. Band 1 : Below $40,000
+2. Band 2: $40,000 – 150,000
+3. Band 3: More than $150,000
+
+Following are the outputs of the 5 different CART model.
+
+CART 1 : Variable Age
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/rf1.png?raw=true)
+
+CART 2 : Variable Gender
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/rf2.png?raw=true)
+
+CART 3 : Variable Education
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/rf3.png?raw=true)
+
+CART 4 : Variable Residence
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/rf4.png?raw=true)
+
+CART 5 : Variable Industry
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/rf5.png?raw=true)
+
+Using these 5 CART models, we need to come up with singe set of probability to belong to each of the salary classes. For simplicity, we will just take a mean of probabilities in this case study. Other than simple mean, we also consider vote method to come up with the final prediction. To come up with the final prediction let’s locate the following profile in each CART model :
+
+1. Age : 35 years , 
+2. Gender : Male , 
+3. Highest Educational Qualification : Diploma holder, 
+4. Industry : Manufacturing, 
+5. Residence : Metro
+
+For each of these CART model, following is the distribution across salary bands :
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/DF.png?raw=true)
+
+The final probability is simply the average of the probability in the same salary bands in different CART models. As you can see from this analysis, that there is 70% chance of this individual falling in class 1 (less than $40,000) and around 24% chance of the individual falling in class 2.
+
+**Advantages of Random Forest**
+
+- This algorithm can solve both type of problems i.e. classification and regression and does a decent estimation at both fronts.
+- One of benefits of Random forest which excites me most is, the power of handle large data set with higher dimensionality. It can handle thousands of input variables and identify most significant variables so it is considered as one of the dimensionality reduction methods. Further, the model outputs **Importance of variable**, which can be a very handy feature (on some random data set).
+
+![Alt text](
+https://github.com/5267/ML/blob/master/resources/pics/Variable_Important.png?raw=true)
+
+- It has an effective method for estimating missing data and maintains accuracy when a large proportion of the data are missing.
+- It has methods for balancing errors in data sets where classes are imbalanced.
+- The capabilities of the above can be extended to unlabeled data, leading to unsupervised clustering, data views and outlier detection.
+- Random Forest involves sampling of the input data with replacement called as bootstrap sampling. Here one third of the data is not used for training and can be used to testing. These are called the out of bag samples. Error estimated on these **out of bag** samples is known as out of bag error. Study of error estimates by Out of bag, gives evidence to show that the out-of-bag estimate is as accurate as using a test set of the same size as the training set. Therefore, using the out-of-bag error estimate removes the need for a set aside test set.
+
+**Disadvantages of Random Forest**
+
+- It surely does a good job at classification but not as good as for regression problem as it does not give precise continuous nature predictions. In case of regression, it doesn’t predict beyond the range in the training data, and that they may over-fit data sets that are particularly noisy.
+- Random Forest can feel like a black box approach for statistical modelers – you have very little control on what the model does. You can at best – try different parameters and random seeds!
+
+```
+#Import Library
+from sklearn.ensemble import RandomForestClassifier #use RandomForestRegressor for regression problem
+#Assumed you have, X (predictor) and Y (target) for training data set and x_test(predictor) of test_dataset
+# Create Random Forest object
+model= RandomForestClassifier(n_estimators=1000)
+# Train the model using the training sets and check score
+model.fit(X, y)
+#Predict Output
+predicted= model.predict(x_test)
+```
+
+#### 5.2 Boosting, How does it work?
