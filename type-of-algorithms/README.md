@@ -627,3 +627,44 @@ predicted= model.predict(x_test)
 ```
 
 #### 5.2 Boosting, How does it work?
+<u>Definition:</u> The term ‘Boosting’ refers to a family of algorithms which converts **weak** learner to **strong** learners.
+
+Let’s understand this definition in detail by solving a problem of spam email identification:
+
+How would you classify an email as SPAM or not? Like everyone else, our initial approach would be to identify ‘spam’ and ‘not spam’ emails using following criteria. If:
+
+1. Email has only one image file (promotional image), It’s a SPAM
+2. Email has only link(s), It’s a SPAM
+3. Email body consist of sentence like “You won a prize money of $ xxxxxx”, It’s a SPAM
+4. Email from our official domain “Analyticsvidhya.com” , Not a SPAM
+5. Email from known source, Not a SPAM
+
+Above, we’ve defined multiple rules to classify an email into ‘spam’ or ‘not spam’. But, do you think these rules individually are strong enough to successfully classify an email? No.
+
+Individually, these rules are not powerful enough to classify an email into ‘spam’ or ‘not spam’. Therefore, these rules are called as weak learner.
+
+To convert weak learner to strong learner, we’ll combine the prediction of each weak learner using methods like:
+
+- Using average/ weighted average
+- Considering prediction has higher vote
+
+For example:  Above, we have defined 5 weak learners. Out of these 5, 3 are voted as ‘SPAM’ and 2 are voted as ‘Not a SPAM’. In this case, by default, we’ll consider an email as SPAM because we have higher(3) vote for ‘SPAM’.
+
+**How does it work ?**
+
+Now we know that, boosting combines weak learner a.k.a. base learner to form a strong rule. An immediate question which should pop in your mind is, ‘How boosting identify weak rules?‘
+
+To find weak rule, we apply base learning (ML) algorithms with a different distribution. Each time base learning algorithm is applied, it generates a new weak prediction rule. This is an iterative process. After many iterations, the boosting algorithm combines these weak rules into a single strong prediction rule.
+
+Here’s another question which might haunt you, ‘How do we choose different distribution for each round?’
+
+For choosing the right distribution, here are the following steps:
+
+<u>Step 1</u>:  The base learner takes all the distributions and assign equal weight or attention to each observation.
+
+<u>Step 2</u>: If there is any prediction error caused by first base learning algorithm, then we pay higher attention to observations having prediction error. Then, we apply the next base learning algorithm.
+
+<u>Step 3</u>: Iterate Step 2 till the limit of base learning algorithm is reached or higher accuracy is achieved.
+
+Finally, it combines the outputs from weak learner and creates  a strong learner which eventually improves the prediction power of the model. Boosting pays higher focus on examples which are mis-classiﬁed or have higher errors by preceding weak rules.
+There are many boosting algorithms which impart additional boost to model’s accuracy. In this tutorial, we’ll learn about the two most commonly used algorithms i.e. **Gradient Boosting (GBM) and XGboost**.
