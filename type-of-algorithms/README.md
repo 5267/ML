@@ -19,10 +19,23 @@ Here is the list of commonly used machine learning algorithms. These algorithms 
 1. Linear Regression
 2. Logistic Regression
 3. Decision Tree
-    - ensemble method
-        - Bagging: Random Forest & CART
-        - Boosting
-        - Stacking
+    - Ensemble Method
+        - Basic Ensemble Tech.
+            - Max Voting
+            - Averaging
+            - Weighted Average
+        - Advance Ensemble Tech.
+            - Stacking
+            - Blending
+            - Bagging
+            - Boosting
+        - Algorithms based on Bagging an Boosting
+            - Bagging Meta-estimator
+            - Random Forest
+            - AdaBoost
+            - GBM
+            - Light GBM
+            - CatBoost
 4. SVM
 5. Naive Bayes
 6. kNN
@@ -485,6 +498,259 @@ A champion model should maintain a balance between these two types of errors. Th
 
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/model_complexity.png?raw=true)
 
+#### 5.1 Basic Ensemble Tech.
+**5.1.1 Max Voting**
+The max voting method is generally used for classification problems. In this technique, multiple models are used to make predictions for each data point. The predictions by each model are considered as a ‘vote’. The predictions which we get from the majority of the models are used as the final prediction.
+
+For example, when you asked 5 of your colleagues to rate your movie (out of 5); we’ll assume three of them rated it as 4 while two of them gave it a 5. Since the majority gave a rating of 4, the final rating will be taken as 4. You can consider this as taking the mode of all the predictions.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/MaxVoting.png?raw=true)
+**Sample Code**
+```
+model1 = tree.DecisionTreeClassifier()
+model2 = KNeighborsClassifier()
+model3= LogisticRegression()
+
+model1.fit(x_train,y_train)
+model2.fit(x_train,y_train)
+model3.fit(x_train,y_train)
+
+pred1=model1.predict(x_test)
+pred2=model2.predict(x_test)
+pred3=model3.predict(x_test)
+
+final_pred = np.array([])
+for i in range(0,len(x_test)):
+    final_pred = np.append(final_pred, mode([pred1[i], pred2[i], pred3[i]]))
+```
+
+Alternatively, you can use “VotingClassifier” module in sklearn as follows:
+
+```
+from sklearn.ensemble import VotingClassifier
+model1 = LogisticRegression(random_state=1)
+model2 = tree.DecisionTreeClassifier(random_state=1)
+model = VotingClassifier(estimators=[('lr', model1), ('dt', model2)], voting='hard')
+model.fit(x_train,y_train)
+model.score(x_test,y_test)
+```
+
+**5.1.2 Averaging**
+Similar to the max voting technique, multiple predictions are made for each data point in averaging. In this method, we take an average of predictions from all the models and use it to make the final prediction. Averaging can be used for making predictions in regression problems or while calculating probabilities for classification problems.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Averaging.png?raw=true)
+
+**Sample Code**
+
+```
+model1 = tree.DecisionTreeClassifier()
+model2 = KNeighborsClassifier()
+model3= LogisticRegression()
+
+model1.fit(x_train,y_train)
+model2.fit(x_train,y_train)
+model3.fit(x_train,y_train)
+
+pred1=model1.predict_proba(x_test)
+pred2=model2.predict_proba(x_test)
+pred3=model3.predict_proba(x_test)
+
+finalpred=(pred1+pred2+pred3)/3
+```
+
+**5.1.3 Weighted Average**
+This is an extension of the averaging method. All models are assigned different weights defining the importance of each model for prediction. For instance, if two of your colleagues are critics, while others have no prior experience in this field, then the answers by these two friends are given more importance as compared to the other people.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/weighted%20Average.png?raw=true)
+
+**Sample Code**
+
+```
+model1 = tree.DecisionTreeClassifier()
+model2 = KNeighborsClassifier()
+model3= LogisticRegression()
+
+model1.fit(x_train,y_train)
+model2.fit(x_train,y_train)
+model3.fit(x_train,y_train)
+
+pred1=model1.predict_proba(x_test)
+pred2=model2.predict_proba(x_test)
+pred3=model3.predict_proba(x_test)
+
+finalpred=(pred1*0.3+pred2*0.3+pred3*0.4)
+```
+
+#### 5.2 Advance Ensemble Tech.
+**5.2.1 Stacking**
+Stacking is an ensemble learning technique that uses predictions from multiple models (for example decision tree, knn or svm) to build a new model. This model is used for making predictions on the test set. Below is a step-wise explanation for a simple stacked ensemble:
+
+1. The train set is split into 10 parts.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking1.png?raw=true)
+2. A base model (suppose a decision tree) is fitted on 9 parts and predictions are made for the 10th part. This is done for each part of the train set.（注：分成几份，就会训练几次）
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking2.png?raw=true)
+3. The base model (in this case, decision tree) is then fitted on the whole train dataset.
+4. Using this model, predictions are made on the test set.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking3.png?raw=true)
+5. Steps 2 to 4 are repeated for another base model (say knn) resulting in another set of predictions for the train set and test set.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking4.png?raw=true)
+6. The predictions from the train set are used as features to build a new model.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking5.png?raw=true)
+
+This model is used to make final predictions on the test prediction set.
+
+**Sample Code**
+We first define a function to make predictions on n-folds of train and test dataset. This function returns the predictions for train and test for each model.
+
+```
+def Stacking(model,train,y,test,n_fold):
+   folds=StratifiedKFold(n_splits=n_fold,random_state=1)
+   test_pred=np.empty((test.shape[0],1),float)
+   train_pred=np.empty((0,1),float)
+   for train_indices,val_indices in folds.split(train,y.values):
+      x_train,x_val=train.iloc[train_indices],train.iloc[val_indices]
+      y_train,y_val=y.iloc[train_indices],y.iloc[val_indices]
+
+      model.fit(X=x_train,y=y_train)
+      train_pred=np.append(train_pred,model.predict(x_val))
+      test_pred=np.append(test_pred,model.predict(test))
+    return test_pred.reshape(-1,1),train_pred
+```
+
+Now we’ll create two base models – decision tree and knn.
+
+```
+model1 = tree.DecisionTreeClassifier(random_state=1)
+
+test_pred1 ,train_pred1=Stacking(model=model1,n_fold=10, train=x_train,test=x_test,y=y_train)
+
+train_pred1=pd.DataFrame(train_pred1)
+test_pred1=pd.DataFrame(test_pred1)
+```
+
+```
+model2 = KNeighborsClassifier()
+
+test_pred2 ,train_pred2=Stacking(model=model2,n_fold=10,train=x_train,test=x_test,y=y_train)
+
+train_pred2=pd.DataFrame(train_pred2)
+test_pred2=pd.DataFrame(test_pred2)
+```
+
+Create a third model, logistic regression, on the predictions of the decision tree and knn models.
+
+```
+df = pd.concat([train_pred1, train_pred2], axis=1)
+df_test = pd.concat([test_pred1, test_pred2], axis=1)
+
+model = LogisticRegression(random_state=1)
+model.fit(df,y_train)
+model.score(df_test, y_test)
+```
+
+<font color='red'>注意事项：StratifiedKFold & KFold的区别</font>
+
+**KFold交叉采样**：将训练/测试数据集划分n_splits个互斥子集，每次只用其中一个子集当做测试集，剩下的（n_splits-1）作为训练集，进行n_splits次实验并得到n_splits个结果。
+
+**StratifiedKFold分层采样**：用于交叉验证：与KFold最大的差异在于，StratifiedKFold方法是根据标签中不同类别占比来进行拆分数据的，分层采样，确保训练集，测试集中各类别样本的**比例与原始数据集中相同**。
+
+实例分析两者差别
+```
+1、首先生成8行数据(含特征和标签数据)
+import numpy as np
+from sklearn.model_selection import StratifiedKFold,KFold
+
+X=np.array([
+    [1,2,3,4],
+    [11,12,13,14],
+    [21,22,23,24],
+    [31,32,33,34],
+    [41,42,43,44],
+    [51,52,53,54],
+    [61,62,63,64],
+    [71,72,73,74]
+])
+ 
+y=np.array([1,1,0,0,1,1,0,0])
+```
+```
+2、利用KFold方法交叉采样：按顺序分别取第1-2、3-4、5-6和7-8的数据
+kfolder = KFold(n_splits=4,random_state=1)
+for train, test in kfolder.split(X,y):
+    print('Train: %s | test: %s' % (train, test),'\n')
+>>>注意下面的234是数据的标签
+Train: [2 3 4 5 6 7] | test: [0 1]
+Train: [0 1 4 5 6 7] | test: [2 3]
+Train: [0 1 2 3 6 7] | test: [4 5]
+Train: [0 1 2 3 4 5] | test: [6 7]
+```
+
+```
+3、利用StratifiedKFold方法分层采样：依照标签的比例来抽取数据，本案例集标签0和1的比例是1：1，因此在抽取数据时也是按照标签比例1：1来提取的
+sfolder = StratifiedKFold(n_splits=4,random_state=0)
+for train, test in sfolder.split(X,y):
+    print('Train: %s | test: %s' % (train, test))
+>>>
+Train: [1 3 4 5 6 7] | test: [0 2]
+Train: [0 2 4 5 6 7] | test: [1 3]
+Train: [0 1 2 3 5 7] | test: [4 6]
+Train: [0 1 2 3 4 6] | test: [5 7]
+
+```
+
+**5.2.2 Blending**
+Blending follows the same approach as stacking but uses only a holdout (validation) set from the train set to make predictions. In other words, unlike stacking, the predictions are made on the holdout set only.
+
+1. The train set is split into training and validation sets.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/blending1.png?raw=true)
+
+2. Model(s) are fitted on the training set.
+3. The predictions are made on the validation set and the test set.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/blending2.png?raw=true)
+
+4. The validation set and its predictions are used as features to build a new model.
+5. This model is used to make final predictions on the test and meta-features.
+
+**Sample Code**
+
+We’ll build two models, decision tree and knn, on the train set in order to make predictions on the validation set.
+
+```
+model1 = tree.DecisionTreeClassifier()
+model1.fit(x_train, y_train)
+val_pred1=model1.predict(x_val)
+test_pred1=model1.predict(x_test)
+val_pred1=pd.DataFrame(val_pred1)
+test_pred1=pd.DataFrame(test_pred1)
+
+model2 = KNeighborsClassifier()
+model2.fit(x_train,y_train)
+val_pred2=model2.predict(x_val)
+test_pred2=model2.predict(x_test)
+val_pred2=pd.DataFrame(val_pred2)
+test_pred2=pd.DataFrame(test_pred2)
+```
+
+Combining the meta-features and the validation set, a logistic regression model is built to make predictions on the test set.
+
+```
+df_val=pd.concat([x_val, val_pred1,val_pred2],axis=1)
+df_test=pd.concat([x_test, test_pred1,test_pred2],axis=1)
+
+model = LogisticRegression()
+model.fit(df_val,y_val)
+model.score(df_test,y_test)
+```
+
+**5.2.3 Bagging**
+**5.2.4 Boosting**
+#### 5.3 Algorithms based on Bagging an Boosting
+
+- Bagging Meta-estimator
+
+- Random Forest
+- AdaBoost
+- GBM
+- Light GBM
+- CatBoost
+
 Some of the commonly used ensemble methods include: **Bagging, Boosting and Stacking**
 
 #### 5.1 bagging, How does it work?
@@ -629,6 +895,9 @@ predicted= model.predict(x_test)
 #### 5.2 Boosting, How does it work?
 <u>Definition:</u> The term ‘Boosting’ refers to a family of algorithms which converts **weak** learner to **strong** learners.
 
+**Boost vs Bagging**
+Boosting algorithms play a crucial role in dealing with bias variance trade-off. Unlike bagging algorithms, which **only controls for high variance** in a model, boosting controls both the aspects (bias & variance), and is considered to be more effective. 
+
 Let’s understand this definition in detail by solving a problem of spam email identification:
 
 How would you classify an email as SPAM or not? Like everyone else, our initial approach would be to identify ‘spam’ and ‘not spam’ emails using following criteria. If:
@@ -652,19 +921,49 @@ For example:  Above, we have defined 5 weak learners. Out of these 5, 3 are vote
 
 **How does it work ?**
 
-Now we know that, boosting combines weak learner a.k.a. base learner to form a strong rule. An immediate question which should pop in your mind is, ‘How boosting identify weak rules?‘
+combines a set of weak learners and delivers improved prediction accuracy. At any instant t, the model outcomes are weighed based on the outcomes of previous instant t-1. The outcomes **predicted correctly** are given a **lower weight** and the ones miss-classified are weighted higher.
 
-To find weak rule, we apply base learning (ML) algorithms with a different distribution. Each time base learning algorithm is applied, it generates a new weak prediction rule. This is an iterative process. After many iterations, the boosting algorithm combines these weak rules into a single strong prediction rule.
+Let’s understand it visually:
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/boosting.png?raw=true)
 
-Here’s another question which might haunt you, ‘How do we choose different distribution for each round?’
+1. Box 1: Output of First Weak Learner (From the left)
+Initially all points have same weight (denoted by their size).
+The decision boundary predicts 2 +ve and 5 -ve points correctly.
 
-For choosing the right distribution, here are the following steps:
+2. Box 2: Output of Second Weak Learner
+The points classified correctly in box 1 are given a lower weight and vice versa.
+The model focuses on high weight points now and classifies them correctly. But, others are misclassified now.
 
-<u>Step 1</u>:  The base learner takes all the distributions and assign equal weight or attention to each observation.
-
-<u>Step 2</u>: If there is any prediction error caused by first base learning algorithm, then we pay higher attention to observations having prediction error. Then, we apply the next base learning algorithm.
-
-<u>Step 3</u>: Iterate Step 2 till the limit of base learning algorithm is reached or higher accuracy is achieved.
+Similar trend can be seen in box 3 as well. This continues for many iterations. In the end, all models are given a weight depending on their accuracy and a consolidated result is generated.
 
 Finally, it combines the outputs from weak learner and creates  a strong learner which eventually improves the prediction power of the model. Boosting pays higher focus on examples which are mis-classiﬁed or have higher errors by preceding weak rules.
-There are many boosting algorithms which impart additional boost to model’s accuracy. In this tutorial, we’ll learn about the two most commonly used algorithms i.e. **Gradient Boosting (GBM) and XGboost**.
+There are many boosting algorithms which impart additional boost to model’s accuracy. In this tutorial, we’ll learn about the two most commonly used algorithms i.e. **AdaBoost（Adaptive Boosting）、Gradient Boosting (GBM) and XGboost**.
+
+#### 5.2.1 AdaBoost
+<font color='red'>Classification Boosters</font>：Let’s take a very simple example to understand the underlying concept of AdaBoost. You have two classes : 0’s and 1’s. Each number is an observation. The only two features available is x-axis and y-axis. For instance (1,1)  is a 0 while (4,4) is a 1. Now using these two features you need to classify each observation. Our ultimate objective remains the same as any classifier problem : find the classification boundary. Following are the step we follow to apply an AdaBoost.
+
+**Step 1 : Visualize the data** : Let’s first understand the data and find insights on whether we have a linear classifier boundary. As shown below, no such boundary exist which can separate 0’s from 1’s.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/adboost1.png?raw=true)
+
+**Step 2 : Make the first Decision stump**: You have already read about decision trees in many of our previous articles. Decision stump is a unit depth tree which decides just 1 most significant cut on features. Here it chooses draw the boundary starting from the third row from top. Now the yellow portion is expected to be all 0’s and unshaded portion to be all 1’s. However, we see high number of false positive post we build this decision stump. We have nine 1’s being wrongly qualified as 0’s. And similarly eighteen 0’s qualified as 1’s.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/adboost2.png?raw=true)
+
+**Step 3 : Give additional weight to mis-classified observations**: Once we know the misclassified observations, we give additional weight to these observations. Hence, you see 0’s and 1’s in bold which were misclassified before. In the next level, we will make sure that these highly weighted observation are classified correct
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/adboost3.png?raw=true)
+
+**Step 4 : Repeat the process and combine all stumps to get final classifier** : We repeat the process multiple times and focus more on previously misclassified observations. Finally, we take a weighted mean of all the boudaries discovered which will look something as below.
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/adboost4.png?raw=true)
+
+Real life examples：[Face Detection](https://www.analyticsvidhya.com/blog/2015/01/basics-image-processing-feature-extraction-python/)
+
+```
+from sklearn.ensemble import AdaBoostClassifier #For Classification
+from sklearn.ensemble import AdaBoostRegressor #For Regression
+from sklearn.tree import DecisionTreeClassifier
+dt = DecisionTreeClassifier() 
+clf = AdaBoostClassifier(n_estimators=100, base_estimator=dt,learning_rate=1)
+#Above I have used decision tree as a base estimator, you can use any ML learner as base estimator if it ac# cepts sample weight 
+clf.fit(x_train,y_train)
+```
+
+#### 5.2.2 Gradient Boosting (GBM)
