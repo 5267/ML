@@ -740,16 +740,278 @@ model.score(df_test,y_test)
 ```
 
 **5.2.3 Bagging**
+
+The idea behind bagging is combining the results of multiple models (for instance, all decision trees) to get a generalized result. Here’s a question: If you create all the models on the same set of data and combine it, will it be useful? There is a high chance that these models will give the same result since they are getting the same input. So how can we solve this problem? One of the techniques is bootstrapping.
+
+Bootstrapping is a sampling technique in which we create subsets of observations from the original dataset, with replacement. The size of the subsets is the same as the size of the original set.
+
+Bagging (or Bootstrap Aggregating) technique uses these subsets (bags) to get a fair idea of the distribution (complete set). The size of subsets created for bagging may be less than the original set.
+
+1. Multiple subsets are created from the original dataset, selecting observations with replacement.
+2. A base model (weak model) is created on each of these subsets.
+3. The models run in parallel and are independent of each other.
+4. The final predictions are determined by combining the predictions from all the models.
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/bagging1.png?raw=true)
+
 **5.2.4 Boosting**
+见后面详细介绍
+
 #### 5.3 Algorithms based on Bagging an Boosting
+For this article, I have used the Loan Prediction Problem, . You can download the dataset from [here](https://github.com/5267/ML/tree/master/all-data/load_prediction). 数据清洗与数据探索全流程可见[ Ultimate guide for Data Exploration in Python](https://www.analyticsvidhya.com/blog/2015/04/comprehensive-guide-data-exploration-sas-using-python-numpy-scipy-matplotlib-pandas/)，数据集进行训练前，需要将数据清洗一下，包括缺失值处理，分类变量数据（数值化，可利用sklearn的preprocessing模块下的LabelEncoder进行转换）,注意分类算法，不需要对Y标签进行数值化转换，下面对Loan_Status进行了转换，目的是同一份数据既能用于分类又能用于回归.
+
+```
+#1、导入数据
+import pandas as pd
+import numpy as np
+
+#reading the dataset
+df=pd.read_csv("/home/user/Desktop/train.csv")
+
+#filling missing values
+df['Gender'].fillna('Male', inplace=True)
+df = df.dropna()
+df = df.drop('Loan_ID',axis=1)
+
+#数据转换：将字符型的变量数值化
+from sklearn import preprocessing
+le = preprocessing.LabelEncoder()
+for i in ['Self_Employed', 'Gender','Married','Education','Property_Area','Loan_Status']:
+    df[i] = le.fit_transform(df[i])
+df['Dependents'] = df['Dependents'].apply(lambda x: 3 if len(str(x))>1 else x)
+for col in df.columns[1:-1]:
+    print(col)
+    df[col] = df[col].apply(lambda x:float(x))
+```
+```
+#2、切分数据
+#split dataset into train and test
+
+from sklearn.model_selection import train_test_split
+train, test = train_test_split(df, test_size=0.3, random_state=0)
+
+x_train=train.drop('Loan_Status',axis=1)
+y_train=train['Loan_Status']
+
+x_test=test.drop('Loan_Status',axis=1)
+y_test=test['Loan_Status']
+
+#create dummies
+x_train_=pd.get_dummies(x_train)
+x_test_=pd.get_dummies(x_test)
+```
+
+**Bagging algorithms**
 
 - Bagging Meta-estimator
+Bagging meta-estimator is an ensembling algorithm that can be used for both classification (BaggingClassifier) and regression (BaggingRegressor) problems. It follows the typical bagging technique to make predictions. Following are the steps for the bagging meta-estimator algorithm.
+1. Random subsets are created from the original dataset (Bootstrapping).
+2. The subset of the dataset includes **all features**.
+3. A user-specified base estimator is fitted on each of these smaller sets.
+4. Predictions from each model are combined to get the final result.
+
+```
+#code for classification problem
+from sklearn.ensemble import BaggingClassifier
+from sklearn import tree
+model = BaggingClassifier(tree.DecisionTreeClassifier(random_state=1))
+model.fit(x_train, y_train)
+print(model.predict(x_test))
+model.score(x_test,y_test)
+
+#code for regression problem
+from sklearn.ensemble import BaggingRegressor
+model = BaggingRegressor(tree.DecisionTreeRegressor(random_state=1))
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+```
 
 - Random Forest
+It is an extension of the bagging estimator algorithm. The base estimators in random forest are decision trees. Unlike bagging meta estimator, random forest **randomly selects a set of features** which are used to decide the best split at each node of the decision tree.
+
+Looking at it step-by-step, this is what a random forest model does:
+
+1. Random subsets are created from the original dataset (bootstrapping).
+2. At each node in the decision tree, only a random set of features are considered to decide the best split.
+3. A decision tree model is fitted on each of the subsets.
+4. The final prediction is calculated by averaging the predictions from all decision trees.
+
+```
+#分类
+from sklearn.ensemble import RandomForestClassifier
+model= RandomForestClassifier(random_state=1)
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+
+#feature importance
+for i, j in sorted(zip(x_train.columns, model.feature_importances_)):
+    print(i, j)
+
+#回归
+from sklearn.ensemble import RandomForestRegressor
+model= RandomForestRegressor()
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+```
+
+**Boosting algorithms**
+
 - AdaBoost
+Adaptive boosting or AdaBoost is one of the simplest boosting algorithms. Usually, decision trees are used for modelling. Multiple sequential models are created, each correcting the errors from the last model. AdaBoost assigns weights to the observations which are incorrectly predicted and the subsequent model works to predict these values correctly.
+
+Below are the steps for performing the AdaBoost algorithm:
+
+1. Initially, all observations in the dataset are given equal weights.
+2. A model is built on a subset of data.
+3. Using this model, predictions are made on the whole dataset.
+4. Errors are calculated by comparing the predictions and actual values.
+5. While creating the next model, higher weights are given to the data points which were predicted incorrectly.
+6. Weights can be determined using the error value. For instance, higher the error more is the weight assigned to the observation.
+7. This process is repeated until the error function does not change, or the maximum limit of the number of estimators is reached.
+
+```
+#分类
+from sklearn.ensemble import AdaBoostClassifier
+model = AdaBoostClassifier(random_state=1)
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+
+#回归
+from sklearn.ensemble import AdaBoostRegressor
+model = AdaBoostRegressor()
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+```
+
 - GBM
+Gradient Boosting or GBM is another ensemble machine learning algorithm that works for both regression and classification problems. GBM uses the boosting technique, combining a number of weak learners to form a strong learner.
+How about useing a simple example to understand the GBM algorithm. We have to predict the age of a group of people using the below data:
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/GBM1.png?raw=true)
+
+1. The mean age is assumed to be the predicted value for all observations in the dataset.
+2. The errors are calculated using this mean prediction and actual values of age.
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/GBM2.png?raw=true)
+
+3. A tree model is created using the errors calculated above as **target variable**. Our objective is to find the best split to minimize the error.
+4. The predictions by this model are combined with the predictions 1.
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/GBM3.png?raw=true)
+
+5. This value calculated above is the new prediction.
+6. New errors are calculated using this predicted value and actual value.
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/GBM4.png?raw=true)
+Steps 2 to 6 are repeated till the maximum number of iterations is reached (or error function does not change).
+
+```
+#分类
+from sklearn.ensemble import GradientBoostingClassifier
+model= GradientBoostingClassifier(learning_rate=0.01,random_state=1)
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+
+#回归
+from sklearn.ensemble import GradientBoostingRegressor
+model= GradientBoostingRegressor()
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+```
+
+- XGBM
+XGBoost (extreme Gradient Boosting) is an advanced implementation of the gradient boosting algorithm. XGBoost has proved to be a highly effective ML algorithm, extensively used in machine learning competitions and hackathons. XGBoost has high predictive power and is almost 10 times faster than the other gradient boosting techniques. It also includes a variety of regularization which reduces overfitting and improves overall performance. Hence it is also known as **‘regularized boosting‘** technique.
+Let us see how XGBoost is comparatively better than other techniques:
+
+1. Regularization:
+    - Standard GBM implementation has no regularisation like XGBoost.
+    - Thus XGBoost also helps to reduce overfitting.
+2. Parallel Processing:
+    - XGBoost implements parallel processing and is faster than GBM .
+    - XGBoost also supports implementation on Hadoop.
+3. High Flexibility:
+    - XGBoost allows users to define custom optimization objectives and evaluation criteria adding a whole new dimension to the model.
+4. Handling Missing Values:
+    - XGBoost has an in-built routine to handle missing values.
+5. Tree Pruning:
+    - XGBoost makes splits up to the max_depth specified and then starts pruning the tree backwards and removes splits beyond which there is no positive gain.
+6. Built-in Cross-Validation:
+    - XGBoost allows a user to run a cross-validation at each iteration of the boosting process and thus it is easy to get the exact optimum number of boosting iterations in a single run.
+
+```
+#分类
+import xgboost as xgb
+model=xgb.XGBClassifier(random_state=1,learning_rate=0.01)
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+
+#回归
+import xgboost as xgb
+model=xgb.XGBClassifier(random_state=1,learning_rate=0.01)
+model.fit(x_train, y_train)
+model.score(x_test,y_test)
+```
+
 - Light GBM
+Before discussing how Light GBM works, let’s first understand why we need this algorithm when we have so many others (like the ones we have seen above). **Light GBM beats all the other algorithms when the dataset is extremely large**. Compared to the other algorithms, Light GBM takes lesser time to run on a huge dataset. LightGBM和GBM的详细比较参考[此文](https://www.analyticsvidhya.com/blog/2017/06/which-algorithm-takes-the-crown-light-gbm-vs-xgboost/)
+
+LightGBM is a gradient boosting framework that uses tree-based algorithms and follows **leaf-wise approach** while other algorithms work in a **level-wise approach** pattern. The images below will help you understand the difference in a better way.
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/LightGBM.png?raw=true)
+
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/LightGBM2.png?raw=true)
+
+Leaf-wise grwth may cause over-fitting on smaller datasets but that can be avoided by using the ‘max_depth’ parameter for learning
+```
+#分类
+import lightgbm as lgb
+train_data=lgb.Dataset(x_train,label=y_train)
+#define parameters
+params = {'learning_rate':0.001}
+model= lgb.train(params, train_data, 100) 
+y_pred=model.predict(x_test)
+for i in range(0,185):
+   if y_pred[i]>=0.5: 
+   y_pred[i]=1
+else: 
+   y_pred[i]=0
+
+#回归
+import lightgbm as lgb
+train_data=lgb.Dataset(x_train,label=y_train)
+params = {'learning_rate':0.001}
+model= lgb.train(params, train_data, 100)
+from sklearn.metrics import mean_squared_error
+rmse=mean_squared_error(y_pred,y_test)**0.5
+```
+
 - CatBoost
+Handling categorical variables is a tedious process, especially when you have a large number of such variables. When your categorical variables have too many labels (i.e. they are highly cardinal), performing one-hot-encoding on them exponentially increases the dimensionality and it becomes really difficult to work with the dataset. catBoost算法[详细介绍](https://www.analyticsvidhya.com/blog/2017/08/catboost-automated-categorical-data/)
+
+CatBoost can automatically deal with categorical variables and does not require extensive data preprocessing like other machine learning algorithms.
+
+How many of you have seen this error while building your machine learning models using “sklearn”?
+![Alt text](https://github.com/5267/ML/blob/master/resources/pics/catBoost.png?raw=true)
+
+This error occurs when dealing with categorical (string) variables. In sklearn, you are required to convert these categories in the numerical format. [Transforming categorical features to numerical features](https://tech.yandex.com/catboost/doc/dg/concepts/algorithm-main-stages_cat-to-numberic-docpage/)
+
+CatBoost algorithm effectively deals with categorical variables. Thus, you should not perform one-hot encoding for categorical variables. Just load the files, impute missing values, and you’re good to go.
+
+```
+#分类
+from catboost import CatBoostClassifier
+model=CatBoostClassifier()
+categorical_features_indices = np.where(df.dtypes != np.float)[0]
+model.fit(x_train,y_train,cat_features=([ 0,  1, 2, 3, 4, 10]),eval_set=(x_test, y_test))
+model.score(x_test,y_test)
+
+#回归
+from catboost import CatBoostRegressor
+model=CatBoostRegressor()
+categorical_features_indices = np.where(df.dtypes != np.float)[0]
+model.fit(x_train,y_train,cat_features=([ 0,  1, 2, 3, 4, 10]),eval_set=(x_test, y_test))
+model.score(x_test,y_test)
+```
 
 Some of the commonly used ensemble methods include: **Bagging, Boosting and Stacking**
 
@@ -921,7 +1183,7 @@ For example:  Above, we have defined 5 weak learners. Out of these 5, 3 are vote
 
 **How does it work ?**
 
-combines a set of weak learners and delivers improved prediction accuracy. At any instant t, the model outcomes are weighed based on the outcomes of previous instant t-1. The outcomes **predicted correctly** are given a **lower weight** and the ones miss-classified are weighted higher.
+Boosting is a sequential process, where each subsequent model attempts to correct the errors of the previous model. it combines a set of weak learners and delivers improved prediction accuracy. At any instant t, the model outcomes are weighed based on the outcomes of previous instant t-1. The outcomes **predicted correctly** are given a **lower weight** and the ones miss-classified are weighted higher.
 
 Let’s understand it visually:
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/boosting.png?raw=true)
@@ -937,7 +1199,22 @@ The model focuses on high weight points now and classifies them correctly. But, 
 Similar trend can be seen in box 3 as well. This continues for many iterations. In the end, all models are given a weight depending on their accuracy and a consolidated result is generated.
 
 Finally, it combines the outputs from weak learner and creates  a strong learner which eventually improves the prediction power of the model. Boosting pays higher focus on examples which are mis-classiﬁed or have higher errors by preceding weak rules.
-There are many boosting algorithms which impart additional boost to model’s accuracy. In this tutorial, we’ll learn about the two most commonly used algorithms i.e. **AdaBoost（Adaptive Boosting）、Gradient Boosting (GBM) and XGboost**.
+There are many boosting algorithms which impart additional boost to model’s accuracy.
+
+1. A subset is created from the original dataset.
+2. Initially, all data points are given equal weights.
+3. A base model is created on this subset.
+4. This model is used to make predictions on the whole dataset.
+5. Errors are calculated using the actual values and predicted values.
+6. The observations which are incorrectly predicted, are given higher weights.
+(Here, the three misclassified blue-plus points will be given higher weights)
+7. Another model is created and predictions are made on the dataset.
+(This model tries to correct the errors from the previous model)
+
+8. Similarly, multiple models are created, each correcting the errors of the previous model.
+9. The final model (strong learner) is the weighted mean of all the models (weak learners).
+
+In this tutorial, we’ll learn about the two most commonly used algorithms i.e. **AdaBoost（Adaptive Boosting）、Gradient Boosting (GBM) and XGboost**.
 
 #### 5.2.1 AdaBoost
 <font color='red'>Classification Boosters</font>：Let’s take a very simple example to understand the underlying concept of AdaBoost. You have two classes : 0’s and 1’s. Each number is an observation. The only two features available is x-axis and y-axis. For instance (1,1)  is a 0 while (4,4) is a 1. Now using these two features you need to classify each observation. Our ultimate objective remains the same as any classifier problem : find the classification boundary. Following are the step we follow to apply an AdaBoost.
@@ -966,4 +1243,7 @@ clf = AdaBoostClassifier(n_estimators=100, base_estimator=dt,learning_rate=1)
 clf.fit(x_train,y_train)
 ```
 
-#### 5.2.2 Gradient Boosting (GBM)
+
+### reference
+1. [A Comprehensive Guide to Ensemble Learning](https://www.analyticsvidhya.com/blog/2018/06/comprehensive-guide-for-ensemble-models/)
+2. [How to deal with categorical variables](https://www.analyticsvidhya.com/blog/2015/11/easy-methods-deal-categorical-variables-predictive-modeling/)
