@@ -583,15 +583,24 @@ finalpred=(pred1*0.3+pred2*0.3+pred3*0.4)
 Stacking is an ensemble learning technique that uses predictions from multiple models (for example decision tree, knn or svm) to build a new model. This model is used for making predictions on the test set. Below is a step-wise explanation for a simple stacked ensemble:
 
 1. The train set is split into 10 parts.
+
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking1.png?raw=true)
+
 2. A base model (suppose a decision tree) is fitted on 9 parts and predictions are made for the 10th part. This is done for each part of the train set.（注：分成几份，就会训练几次）
+
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking2.png?raw=true)
+
 3. The base model (in this case, decision tree) is then fitted on the whole train dataset.
 4. Using this model, predictions are made on the test set.
+
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking3.png?raw=true)
+
 5. Steps 2 to 4 are repeated for another base model (say knn) resulting in another set of predictions for the train set and test set.
+
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking4.png?raw=true)
+
 6. The predictions from the train set are used as features to build a new model.
+
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/stacking5.png?raw=true)
 
 This model is used to make final predictions on the test prediction set.
