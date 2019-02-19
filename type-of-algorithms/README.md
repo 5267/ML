@@ -500,6 +500,7 @@ A champion model should maintain a balance between these two types of errors. Th
 
 #### 5.1 Basic Ensemble Tech.
 **5.1.1 Max Voting**
+
 The max voting method is generally used for classification problems. In this technique, multiple models are used to make predictions for each data point. The predictions by each model are considered as a ‘vote’. The predictions which we get from the majority of the models are used as the final prediction.
 
 For example, when you asked 5 of your colleagues to rate your movie (out of 5); we’ll assume three of them rated it as 4 while two of them gave it a 5. Since the majority gave a rating of 4, the final rating will be taken as 4. You can consider this as taking the mode of all the predictions.
@@ -535,6 +536,7 @@ model.score(x_test,y_test)
 ```
 
 **5.1.2 Averaging**
+
 Similar to the max voting technique, multiple predictions are made for each data point in averaging. In this method, we take an average of predictions from all the models and use it to make the final prediction. Averaging can be used for making predictions in regression problems or while calculating probabilities for classification problems.
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/Averaging.png?raw=true)
 
@@ -557,6 +559,7 @@ finalpred=(pred1+pred2+pred3)/3
 ```
 
 **5.1.3 Weighted Average**
+
 This is an extension of the averaging method. All models are assigned different weights defining the importance of each model for prediction. For instance, if two of your colleagues are critics, while others have no prior experience in this field, then the answers by these two friends are given more importance as compared to the other people.
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/weighted%20Average.png?raw=true)
 
@@ -580,6 +583,7 @@ finalpred=(pred1*0.3+pred2*0.3+pred3*0.4)
 
 #### 5.2 Advance Ensemble Tech.
 **5.2.1 Stacking**
+
 Stacking is an ensemble learning technique that uses predictions from multiple models (for example decision tree, knn or svm) to build a new model. This model is used for making predictions on the test set. Below is a step-wise explanation for a simple stacked ensemble:
 
 1. The train set is split into 10 parts.
@@ -705,6 +709,7 @@ Train: [0 1 2 3 4 6] | test: [5 7]
 ```
 
 **5.2.2 Blending**
+
 Blending follows the same approach as stacking but uses only a holdout (validation) set from the train set to make predictions. In other words, unlike stacking, the predictions are made on the holdout set only.
 
 1. The train set is split into training and validation sets.
@@ -764,6 +769,7 @@ Bagging (or Bootstrap Aggregating) technique uses these subsets (bags) to get a 
 ![Alt text](https://github.com/5267/ML/blob/master/resources/pics/bagging1.png?raw=true)
 
 **5.2.4 Boosting**
+
 见后面详细介绍
 
 #### 5.3 Algorithms based on Bagging an Boosting
@@ -813,6 +819,7 @@ x_test_=pd.get_dummies(x_test)
 **Bagging algorithms**
 
 - Bagging Meta-estimator
+
 Bagging meta-estimator is an ensembling algorithm that can be used for both classification (BaggingClassifier) and regression (BaggingRegressor) problems. It follows the typical bagging technique to make predictions. Following are the steps for the bagging meta-estimator algorithm.
 1. Random subsets are created from the original dataset (Bootstrapping).
 2. The subset of the dataset includes **all features**.
@@ -836,6 +843,7 @@ model.score(x_test,y_test)
 ```
 
 - Random Forest
+
 It is an extension of the bagging estimator algorithm. The base estimators in random forest are decision trees. Unlike bagging meta estimator, random forest **randomly selects a set of features** which are used to decide the best split at each node of the decision tree.
 
 Looking at it step-by-step, this is what a random forest model does:
@@ -866,6 +874,7 @@ model.score(x_test,y_test)
 **Boosting algorithms**
 
 - AdaBoost
+
 Adaptive boosting or AdaBoost is one of the simplest boosting algorithms. Usually, decision trees are used for modelling. Multiple sequential models are created, each correcting the errors from the last model. AdaBoost assigns weights to the observations which are incorrectly predicted and the subsequent model works to predict these values correctly.
 
 Below are the steps for performing the AdaBoost algorithm:
@@ -893,6 +902,7 @@ model.score(x_test,y_test)
 ```
 
 - GBM
+
 Gradient Boosting or GBM is another ensemble machine learning algorithm that works for both regression and classification problems. GBM uses the boosting technique, combining a number of weak learners to form a strong learner.
 How about useing a simple example to understand the GBM algorithm. We have to predict the age of a group of people using the below data:
 
@@ -929,6 +939,7 @@ model.score(x_test,y_test)
 ```
 
 - XGBM
+
 XGBoost (extreme Gradient Boosting) is an advanced implementation of the gradient boosting algorithm. XGBoost has proved to be a highly effective ML algorithm, extensively used in machine learning competitions and hackathons. XGBoost has high predictive power and is almost 10 times faster than the other gradient boosting techniques. It also includes a variety of regularization which reduces overfitting and improves overall performance. Hence it is also known as **‘regularized boosting‘** technique.
 Let us see how XGBoost is comparatively better than other techniques:
 
@@ -962,6 +973,7 @@ model.score(x_test,y_test)
 ```
 
 - Light GBM
+
 Before discussing how Light GBM works, let’s first understand why we need this algorithm when we have so many others (like the ones we have seen above). **Light GBM beats all the other algorithms when the dataset is extremely large**. Compared to the other algorithms, Light GBM takes lesser time to run on a huge dataset. LightGBM和GBM的详细比较参考[此文](https://www.analyticsvidhya.com/blog/2017/06/which-algorithm-takes-the-crown-light-gbm-vs-xgboost/)
 
 LightGBM is a gradient boosting framework that uses tree-based algorithms and follows **leaf-wise approach** while other algorithms work in a **level-wise approach** pattern. The images below will help you understand the difference in a better way.
@@ -995,6 +1007,7 @@ rmse=mean_squared_error(y_pred,y_test)**0.5
 ```
 
 - CatBoost
+
 Handling categorical variables is a tedious process, especially when you have a large number of such variables. When your categorical variables have too many labels (i.e. they are highly cardinal), performing one-hot-encoding on them exponentially increases the dimensionality and it becomes really difficult to work with the dataset. catBoost算法[详细介绍](https://www.analyticsvidhya.com/blog/2017/08/catboost-automated-categorical-data/)
 
 CatBoost can automatically deal with categorical variables and does not require extensive data preprocessing like other machine learning algorithms.
@@ -1051,6 +1064,7 @@ Random Forest is considered to be a panacea of all data science problems. On a f
 Random Forest is a versatile machine learning method capable of performing both regression and classification tasks. It also undertakes dimensional reduction methods, treats missing values, outlier values and other essential **[steps of data exploration](https://www.analyticsvidhya.com/blog/2015/02/data-exploration-preparation-model/)**, and does a fairly good job. It is a type of ensemble learning method, where a group of weak models combine to form a powerful model.
 
 **How does it work?**
+
 In Random Forest, we grow multiple trees as opposed to a single tree in CART model (see comparison between CART and Random Forest here, [part1](https://www.analyticsvidhya.com/blog/2014/06/comparing-cart-random-forest-1/) and [part2](https://www.analyticsvidhya.com/blog/2014/06/comparing-random-forest-simple-cart-model/))
 
 To classify a new object based on attributes, each tree gives a classification and we say the tree “votes” for that class. The forest chooses the classification having the most votes (over all the trees in the forest) and in case of regression, it takes the average of outputs by different trees.
