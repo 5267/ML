@@ -101,3 +101,5 @@ This section is to answer the question related to algorithms. Besides, it occasi
 ## All-data
 When algorithms meets data, sparks are generated. Data are the processing material of algorithms. The algorithms can extract knowledge from data, and provide useful insights. This section hosts all the data used in this project, you can use them reexperiment from scratch.
 
+## Contact
+If you are interested into this project, and be able to make some contribution to it, you are welcome to contact me via email(tangyang_cool@yeah.net) or weicaht(13980741552).
